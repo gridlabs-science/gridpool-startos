@@ -57,6 +57,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   if (!rpcUrl || !zmqBlock) {
     throw new Error('Bitcoin RPC/ZMQ dependency interfaces are unavailable')
   }
+  const rpcHttpUrl = rpcUrl.includes('://') ? rpcUrl : `http://${rpcUrl}`
 
   await mkdir(`${volumeRoot}/gridpool`, { recursive: true })
   await mkdir(`${volumeRoot}/sv2/proof-spool`, { recursive: true })
@@ -106,7 +107,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const bootConfig = {
     bitcoin_notification_mode: 'attached-node',
     NotificationSource: 'BitcoinZmq',
-    bitcoin_rpc_url: rpcUrl,
+    bitcoin_rpc_url: rpcHttpUrl,
     bitcoin_rpc_cookie_file: `${bitcoinMount}/.cookie`,
     bitcoin_rpc_poll_interval_seconds: 5,
     bitcoin_zmq_endpoint: '',
@@ -161,7 +162,7 @@ telemetry_flush_seconds = 5
 fee_cycle_seconds = 1500
 
 [template_provider_type.BitcoinJsonRpc]
-url = "${rpcUrl}"
+url = "${rpcHttpUrl}"
 cookie_file = "${bitcoinMount}/.cookie"
 timeout_seconds = 90
 retry_seconds = 2
