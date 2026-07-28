@@ -12,13 +12,27 @@ server, and back up the GridPool volume before upgrades.
 ## Build
 
 ```bash
+curl -fsSL https://start9.com/start-cli/install.sh | sh
+cd ..
+start-cli s9pk init-workspace
+cd gridpool-startos
 npm ci
 make x86
 # or: make arm
 ```
 
-Install the resulting `.s9pk` through StartOS System > Sideload Service. Set a
-mainnet payout address with **Actions > Configure GridPool**, select the
+The current StartOS packer needs a reachable StartOS build target. Set
+`host.default` in the workspace `.startos/config.yaml`, authenticate once with
+`start-cli auth login`, then rerun `make x86` or `make arm`.
+
+Install the resulting `gridpool_<arch>.s9pk` through StartOS **System >
+Sideload Service**, or run:
+
+```bash
+start-cli package install gridpool_x86_64.s9pk
+```
+
+Set a mainnet payout address with **Actions > Configure GridPool**, select the
 installed Bitcoin dependency, and start GridPool after Bitcoin is synchronized.
 
 Native SV2 miners connect to the service's **Native Stratum V2** interface on
