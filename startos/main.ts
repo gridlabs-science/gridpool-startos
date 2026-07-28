@@ -30,6 +30,11 @@ const mounts = sdk.Mounts.of()
     mountpoint: bitcoinMount,
     subpath: null,
     readonly: true,
+    // Bitcoin's cookie is root-owned and mode 0600 on the dependency
+    // volume. Present root-owned files as UID 1000 so the GridPool image's
+    // unprivileged `boot` process can authenticate without changing the
+    // Bitcoin volume permissions.
+    idmap: [{ fromId: 0, toId: 1000 }],
   })
 
 export const main = sdk.setupMain(async ({ effects }) => {
