@@ -226,6 +226,66 @@ min_interval = 5
       },
       requires: ['prepare-volume'],
     })
+    .addHealthCheck('gridpool-network', {
+      ready: {
+        display: 'GridPool Network',
+        fn: () =>
+          sdk.healthCheck.runHealthScript(
+            [
+              'sh',
+              '-c',
+              [
+                'json=$(curl -fsS --max-time 5 http://127.0.0.1:5000/api/network/summary)',
+                'peers=$(printf "%s" "$json" | sed -n \'s/.*"peerCount":\([0-9][0-9]*\).*/\\1/p\')',
+                'tip=$(printf "%s" "$json" | sed -n \'s/.*"currentTipBlockHeight":\([0-9][0-9]*\).*/\\1/p\')',
+                'sources=$(printf "%s" "$json" | sed -n \'s/.*"localMiningSourceCount":\([0-9][0-9]*\).*/\\1/p\')',
+                'hashrate=$(printf "%s" "$json" | sed -n \'s/.*"localMiningHashrateDisplay":"\\([^"\\]*\\)".*/\\1/p\')',
+                'rpc=$(printf "%s" "$json" | sed -n \'s/.*"rpcReachable":\\([^,}]*\\).*/\\1/p\')',
+                'synced=$(printf "%s" "$json" | sed -n \'s/.*"rpcSynced":\\([^,}]*\\).*/\\1/p\')',
+                'printf "peers=%s; tip=%s; local sources=%s; hashrate=%s; Bitcoin RPC reachable=%s synced=%s\\n" "${peers:-0}" "${tip:---}" "${sources:-0}" "${hashrate:---}" "${rpc:-unknown}" "${synced:-unknown}"',
+              ].join('; '),
+            ],
+            gridpoolSub,
+            {
+              errorMessage: 'GridPool summary endpoint is unavailable',
+              message: (result) => result.trim(),
+            },
+          ),
+      },
+      requires: ['gridpool'],
+    })
+    .addHealthCheck('gridpool-relay', {
+      ready: {
+        display: 'GridPool Relay and Pulse',
+        fn: () =>
+          sdk.healthCheck.runHealthScript(
+            [
+              'sh',
+              '-c',
+              [
+                'json=$(curl -fsS --max-time 5 http://127.0.0.1:5000/api/network/summary)',
+                'pulses=$(printf "%s" "$json" | sed -n \'s/.*"localPulseAcceptedCount":\([0-9][0-9]*\).*/\\1/p\')',
+                'lastPulse=$(printf "%s" "$json" | sed -n \'s/.*"lastLocalPulseUtc":"\\([^"\\]*\\)".*/\\1/p\')',
+                'lastRelay=$(printf "%s" "$json" | sed -n \'s/.*"lastSuccessfulOutboundRelayUtc":"\\([^"\\]*\\)".*/\\1/p\')',
+                'healthy=$(printf "%s" "$json" | sed -n \'s/.*"outboundRelayHealthy":\\([^,}]*\\).*/\\1/p\')',
+                'enabled=$(printf "%s" "$json" | sed -n \'s/.*"pulseProofsEnabled":\\([^,}]*\\).*/\\1/p\')',
+                'printf "pulse proofs enabled=%s; accepted=%s; last pulse=%s; last outbound relay=%s; relay healthy=%s\\n" "${enabled:-unknown}" "${pulses:-0}" "${lastPulse:---}" "${lastRelay:---}" "${healthy:-unknown}"',
+              ].join('; '),
+            ],
+            gridpoolSub,
+            {
+              errorMessage: 'GridPool relay telemetry is unavailable',
+              message: (result) => {
+                const message = result.trim()
+                return message.includes('accepted=0')
+                  ? `${message} (no pulse traffic yet; this is normal when idle)`
+                  : message
+              },
+            },
+          ),
+      },
+      requires: ['gridpool'],
+    })
     .addDaemon('sv2', {
       subcontainer: sv2Sub,
       exec: {

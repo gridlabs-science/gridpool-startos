@@ -1,10 +1,10 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.1.0:5',
+  version: '0.1.0:6',
   releaseNotes: {
     en_US:
-      'Fixes native SV2 startup with attached Bitcoin Core/Knots RPC and preserves the existing state volume.',
+      'Adds GridPool network, Bitcoin, relay, and pulse telemetry to the StartOS health dashboard.',
   },
   migrations: {
     up: async () => {},
