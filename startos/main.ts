@@ -187,6 +187,20 @@ min_interval = 5
   )
 
   return sdk.Daemons.of(effects)
+    .addOneshot('prepare-volume', {
+      subcontainer: gridpoolSub,
+      exec: {
+        command: [
+          'chown',
+          '-R',
+          '1000:1000',
+          '/data/gridpool',
+          '/data/shared',
+        ],
+        user: 'root',
+      },
+      requires: [],
+    })
     .addDaemon('gridpool', {
       subcontainer: gridpoolSub,
       exec: {
@@ -204,7 +218,7 @@ min_interval = 5
             errorMessage: 'GridPool is not ready',
           }),
       },
-      requires: [],
+      requires: ['prepare-volume'],
     })
     .addDaemon('sv2', {
       subcontainer: sv2Sub,
