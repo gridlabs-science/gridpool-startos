@@ -12,6 +12,7 @@ server, and back up the GridPool volume before upgrades.
 ## Build
 
 ```bash
+sudo apt install squashfs-tools squashfs-tools-ng
 curl -fsSL https://start9.com/start-cli/install.sh | sh
 cd ..
 start-cli s9pk init-workspace
@@ -21,15 +22,25 @@ make x86
 # or: make arm
 ```
 
-The current StartOS packer needs a reachable StartOS build target. Set
-`host.default` in the workspace `.startos/config.yaml`, authenticate once with
-`start-cli auth login`, then rerun `make x86` or `make arm`.
+Building and signing the package are local operations and do not require a
+StartOS login. The host is needed only for CLI installation. Set `host.default`
+in the workspace `.startos/config.yaml` to the server origin, without a path:
+
+```yaml
+host:
+  default: https://your-startos-host.local
+```
+
+Authenticate once with `start-cli auth login` before using CLI install
+commands. Do not append `/login` to the hostname; that is a browser route and
+causes CLI RPC requests to fail with `Method Not Allowed`.
 
 Install the resulting `gridpool_<arch>.s9pk` through StartOS **System >
 Sideload Service**, or run:
 
 ```bash
-start-cli package install gridpool_x86_64.s9pk
+start-cli auth login
+start-cli package install --sideload gridpool_x86_64.s9pk
 ```
 
 Set a mainnet payout address with **Actions > Configure GridPool**, select the
