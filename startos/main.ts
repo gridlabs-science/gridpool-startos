@@ -105,7 +105,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
 
   const bootConfig = {
     bitcoin_notification_mode: 'attached-node',
-    NotificationSource: 'Zmq',
+    NotificationSource: 'BitcoinZmq',
     bitcoin_rpc_url: rpcUrl,
     bitcoin_rpc_cookie_file: `${bitcoinMount}/.cookie`,
     bitcoin_rpc_poll_interval_seconds: 5,
