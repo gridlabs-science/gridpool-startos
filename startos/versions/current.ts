@@ -1,10 +1,10 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.1.0:9',
+  version: '0.1.0:10',
   releaseNotes: {
     en_US:
-      'Fixes SegWit SV2 pulse validation and reports attached Bitcoin RPC health correctly.',
+      'Acknowledges native SV2 shares immediately to prevent replayed batches across GridPool work refreshes.',
   },
   migrations: {
     up: async () => {},

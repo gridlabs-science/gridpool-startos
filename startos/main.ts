@@ -152,7 +152,7 @@ coinbase_reward_script = "addr(${settings.payoutAddress})"
 server_id = 1
 pool_signature = "GridPool StartOS Native SV2"
 shares_per_minute = 6.0
-share_batch_size = 10
+share_batch_size = 1
 monitoring_address = "127.0.0.1:34290"
 monitoring_cache_refresh_secs = 15
 
