@@ -2,3 +2,4 @@ node_modules/
 javascript/
 *.s9pk
 *.s9pk.*
+npm-audit.json

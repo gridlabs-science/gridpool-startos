@@ -1,0 +1,10 @@
+{
+  "gridpool": {
+    "reference": "ghcr.io/gridlabs-science/boot-protocol:sha-9ac862a",
+    "indexDigest": "sha256:1a302f3d1a1de3df7b26a4cde6372bf31d453bd024ca697bd6f0a1a09c90b601"
+  },
+  "sv2": {
+    "reference": "ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-36465d2",
+    "indexDigest": "sha256:3d0279df1ccd1d38ed6fbfb3909fd4c7423f51ade7d1263316f5dc86e96d8d5f"
+  }
+}

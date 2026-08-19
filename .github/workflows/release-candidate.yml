@@ -1,0 +1,64 @@
+name: Build release candidate
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*-beta.*']
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  package:
+    strategy:
+      matrix:
+        include:
+          - make_target: x86
+            artifact: gridpool_x86_64.s9pk
+          - make_target: arm
+            artifact: gridpool_aarch64.s9pk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y squashfs-tools squashfs-tools-ng
+      - name: Install pinned StartOS CLI
+        run: |
+          curl -fsSL \
+            https://github.com/Start9Labs/start-technologies/releases/download/start-cli/v1.1.0/start-cli_x86_64-linux \
+            -o /tmp/start-cli
+          echo '70eff67b6e9a936acd8aaaf787b783819252ecedaa5c74d462e3b15ed4dd843a  /tmp/start-cli' | sha256sum -c -
+          install -m 0755 /tmp/start-cli "$HOME/.local/bin/start-cli"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: npm ci
+      - run: npm run check && npm run build
+      - run: ./scripts/verify-release-inputs.sh
+      - run: ./scripts/audit-build-dependencies.sh
+      - name: Initialize StartOS workspace
+        run: cd .. && start-cli s9pk init-workspace
+      - name: Build package
+        run: make ${{ matrix.make_target }}
+      - name: Checksums
+        run: sha256sum '${{ matrix.artifact }}' > '${{ matrix.artifact }}.sha256'
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@v0.24.0
+        with:
+          path: '${{ matrix.artifact }}'
+          format: spdx-json
+          output-file: '${{ matrix.artifact }}.spdx.json'
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: '${{ matrix.artifact }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: '${{ matrix.artifact }}'
+          path: |
+            ${{ matrix.artifact }}
+            ${{ matrix.artifact }}.sha256
+            ${{ matrix.artifact }}.spdx.json
+            npm-audit.json
