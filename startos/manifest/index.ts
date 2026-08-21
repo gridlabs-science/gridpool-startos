@@ -21,7 +21,7 @@ export const manifest = setupManifest({
     sv2: {
       source: {
         dockerTag:
-          'ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-af3389a',
+          'ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-1151f92',
       },
       arch: ['x86_64', 'aarch64'],
     },
