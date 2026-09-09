@@ -1,10 +1,10 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.1.0:19',
+  version: '0.2.2:1',
   releaseNotes: {
     en_US:
-      'Exports the authenticated UDP relay and adds release-candidate lifecycle and supply-chain checks.',
+      'Early beta with V2.2 security hardening, native SV2 mining, authenticated UDP relay, and immutable release inputs.',
   },
   migrations: {
     up: async () => {},

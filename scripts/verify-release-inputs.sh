@@ -8,7 +8,7 @@ for component in gridpool sv2; do
   reference="$(jq -r --arg component "$component" '.[$component].reference' "$lock")"
   expected="$(jq -r --arg component "$component" '.[$component].indexDigest' "$lock")"
   grep -Fq "$reference" "$manifest"
-  [[ "$reference" =~ :sha-[0-9a-f]{7,40}$ ]]
+  [[ "$reference" =~ :sha-[0-9a-f]{7,40}$ || "$reference" =~ :v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]
   [[ "$expected" =~ ^sha256:[0-9a-f]{64}$ ]]
   if command -v docker >/dev/null && docker buildx version >/dev/null 2>&1; then
     actual="$(docker buildx imagetools inspect "$reference" --format '{{json .Manifest}}' | jq -r '.digest // .Digest')"
