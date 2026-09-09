@@ -41,7 +41,12 @@ jobs:
       - run: ./scripts/verify-release-inputs.sh
       - run: ./scripts/audit-build-dependencies.sh
       - name: Initialize StartOS workspace
-        run: cd .. && start-cli s9pk init-workspace
+        run: |
+          cd ..
+          start-cli s9pk init-workspace
+          # start-cli 1.1.0 eagerly resolves host.default while packing even
+          # though package construction does not call a StartOS host API.
+          sed -i 's#https://dev-vm.local#https://github.com#' .startos/config.yaml
       - name: Build package
         run: make ${{ matrix.make_target }}
       - name: Checksums
