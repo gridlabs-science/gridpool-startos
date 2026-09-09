@@ -1,13 +1,13 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.1.0:15',
+  version: '0.2.2:1',
   releaseNotes: {
     en_US:
-      'Isolates and coalesces dashboard reads so the Web UI cannot exhaust public API rate limits.',
+      'Early beta with V2.2 security hardening, native SV2 mining, authenticated UDP relay, and immutable release inputs.',
   },
   migrations: {
     up: async () => {},
     down: IMPOSSIBLE,
   },
-})
+}).satisfies('0.1.0:17')

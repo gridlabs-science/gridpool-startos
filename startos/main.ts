@@ -13,7 +13,7 @@ import {
 } from 'node:fs/promises'
 import { settingsJson } from './fileModels/settings.json'
 import { sdk } from './sdk'
-import { bitcoinMount, sv2Port, uiPort } from './utils'
+import { bitcoinMount, sv2Port, udpRelayPort, uiPort } from './utils'
 
 const volumeRoot = '/media/startos/volumes/main'
 
@@ -109,6 +109,24 @@ export const main = sdk.setupMain(async ({ effects }) => {
     throw new Error('Stored SV2 authority keypair is malformed')
   }
 
+  const bootConfigPath = `${volumeRoot}/gridpool/boot_portal_config.json`
+  let persistedIdentity: Record<string, string> = {}
+  try {
+    const existing = JSON.parse(await readFile(bootConfigPath, 'utf8')) as Record<
+      string,
+      unknown
+    >
+    persistedIdentity = Object.fromEntries(
+      ['ed25519_private_key', 'x25519_private_key']
+        .filter(
+          (key) => typeof existing[key] === 'string' && existing[key] !== '',
+        )
+        .map((key) => [key, existing[key] as string]),
+    )
+  } catch {
+    // First start has no identity yet. The node creates and persists it here.
+  }
+
   const bootConfig = {
     bitcoin_notification_mode: 'attached-node',
     NotificationSource: 'BitcoinZmq',
@@ -137,9 +155,10 @@ export const main = sdk.setupMain(async ({ effects }) => {
     local_adapter_token_file: '/data/shared/local-adapter.token',
     local_sv2_api_url: 'http://127.0.0.1:34290/api/v1/global',
     enable_admin_api: false,
+    ...persistedIdentity,
   }
   await writeFile(
-    `${volumeRoot}/gridpool/boot_portal_config.json`,
+    bootConfigPath,
     `${JSON.stringify(bootConfig, null, 2)}\n`,
     { mode: 0o600 },
   )
@@ -285,6 +304,17 @@ min_interval = 5
               },
             },
           ),
+      },
+      requires: ['gridpool'],
+    })
+    .addHealthCheck('gridpool-udp', {
+      ready: {
+        display: 'GridPool UDP Relay',
+        fn: () =>
+          sdk.healthCheck.checkPortListening(effects, udpRelayPort, {
+            successMessage: 'GridPool UDP relay is listening',
+            errorMessage: 'GridPool UDP relay is not listening',
+          }),
       },
       requires: ['gridpool'],
     })

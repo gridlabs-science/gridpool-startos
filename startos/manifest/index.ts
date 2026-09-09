@@ -14,14 +14,14 @@ export const manifest = setupManifest({
   images: {
     gridpool: {
       source: {
-        dockerTag: 'ghcr.io/gridlabs-science/boot-protocol:sha-9ac862a',
+        dockerTag: 'ghcr.io/gridlabs-science/boot-protocol:v0.2.2-beta.2',
       },
       arch: ['x86_64', 'aarch64'],
     },
     sv2: {
       source: {
         dockerTag:
-          'ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-36465d2',
+          'ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-1151f92',
       },
       arch: ['x86_64', 'aarch64'],
     },

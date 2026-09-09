@@ -1,5 +1,5 @@
 import { sdk } from './sdk'
-import { sv2Port, uiPort } from './utils'
+import { sv2Port, udpRelayPort, uiPort } from './utils'
 
 export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const uiOrigin = await sdk.MultiHost.of(effects, 'ui').bindPort(uiPort, {
@@ -35,5 +35,30 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     query: {},
   })
 
-  return [await uiOrigin.export([ui]), await sv2Origin.export([sv2])]
+  const relayOrigin = await sdk.MultiHost.of(effects, 'gridpool-relay').bindPort(
+    udpRelayPort,
+    {
+      protocol: null,
+      addSsl: null,
+      preferredExternalPort: udpRelayPort,
+      secure: { ssl: false },
+    },
+  )
+  const relay = sdk.createInterface(effects, {
+    name: 'GridPool UDP Relay',
+    id: 'gridpool-relay',
+    description: 'Authenticated GridPool proof and chain-tip relay',
+    type: 'p2p',
+    masked: false,
+    schemeOverride: { ssl: null, noSsl: 'gridpool-udp' },
+    username: null,
+    path: '',
+    query: {},
+  })
+
+  return [
+    await uiOrigin.export([ui]),
+    await sv2Origin.export([sv2]),
+    await relayOrigin.export([relay]),
+  ]
 })
