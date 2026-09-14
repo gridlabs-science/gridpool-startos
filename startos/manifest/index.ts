@@ -14,7 +14,7 @@ export const manifest = setupManifest({
   images: {
     gridpool: {
       source: {
-        dockerTag: 'ghcr.io/gridlabs-science/boot-protocol:v0.2.2-beta.2',
+        dockerTag: 'ghcr.io/gridlabs-science/boot-protocol:sha-be0f0b1',
       },
       arch: ['x86_64', 'aarch64'],
     },

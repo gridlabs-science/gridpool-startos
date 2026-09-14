@@ -19,6 +19,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm test
       - run: npm run build
       - name: Verify immutable images and repository hygiene
         run: ./scripts/verify-release-inputs.sh
