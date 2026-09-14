@@ -1,6 +1,6 @@
 # StartOS / Umbrel parity review
 
-Candidate: 0.1.0:20. Source review and local checks are not an appliance test.
+Candidate: 0.2.2:5 (GitHub beta.6). Source review and local checks are not an appliance test.
 
 ## Applicable changes
 
@@ -34,8 +34,9 @@ part of this package. Existing settings obtain safe defaults for new fields.
 - Configure's address check is only a syntax screen; runtime validation remains
   authoritative. Include a bad-checksum address in appliance acceptance and
   verify no mining work is issued.
-- The pinned SV2 image still has the previously reported PCRE2 vulnerability
-  scan findings. Rebuild/scan it before claiming supply-chain gates passed.
+- The SV2 runtime OS libraries were refreshed in image sha-1e8adcd while
+  verifying the mining binary was unchanged. Publication requires the updated
+  image scan to pass; earlier PCRE2-affected image pins must not be reused.
 - Health scripts still parse selected fields using sed. Missing fields mean
   unavailable telemetry, not proof of node health; replace this with typed JSON
   parsing in a future package/runtime health contract.

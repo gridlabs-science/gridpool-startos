@@ -4,7 +4,7 @@
     "indexDigest": "sha256:c83601e3fd051b834b02376dbd7827652fa96826b9454050c5d2ae933f9475bc"
   },
   "sv2": {
-    "reference": "ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-1151f92",
-    "indexDigest": "sha256:3de54e9c51953d2b5089ae90a25b9a0fa046c18c4ae0139b768b77a4cf0ed50e"
+    "reference": "ghcr.io/gridlabs-science/gridpool-sv2-pool:sha-1e8adcd",
+    "indexDigest": "sha256:894b04939da127188d97dd53aaf5e3a6514de959c827a6ba34161ed5a2fc6fb0"
   }
 }
