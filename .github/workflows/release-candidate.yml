@@ -39,6 +39,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - run: npm ci
       - run: npm run check && npm run build
+      - run: npm test
       - run: ./scripts/verify-release-inputs.sh
       - run: ./scripts/audit-build-dependencies.sh
       - name: Initialize StartOS workspace

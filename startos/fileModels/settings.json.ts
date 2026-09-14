@@ -5,5 +5,7 @@ export const settingsJson = FileHelper.json(
   { base: sdk.volumes.main, subpath: '/settings.json' },
   z.object({
     payoutAddress: z.string().catch(''),
+    minerHost: z.string().default(''),
+    trustedPrivateDashboard: z.boolean().default(false),
   }),
 )

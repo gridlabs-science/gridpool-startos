@@ -71,12 +71,18 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const tokenPath = `${volumeRoot}/shared/local-adapter.token`
   try {
     await readFile(tokenPath)
-  } catch {
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw new Error('Cannot read the stored adapter token; refusing to replace it')
+    }
     await writeFile(tokenPath, randomBytes(32).toString('hex'), { mode: 0o600 })
   }
 
   const authorityPath = `${volumeRoot}/sv2/authority.env`
-  let authority = await readFile(authorityPath, 'utf8').catch(() => '')
+  let authority = await readFile(authorityPath, 'utf8').catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'ENOENT') return ''
+    throw new Error('Cannot read the stored SV2 authority; refusing to replace it')
+  })
   if (!authority) {
     authority = await sdk.SubContainer.withTemp(
       effects,
@@ -123,8 +129,10 @@ export const main = sdk.setupMain(async ({ effects }) => {
         )
         .map((key) => [key, existing[key] as string]),
     )
-  } catch {
-    // First start has no identity yet. The node creates and persists it here.
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw new Error('Cannot read the stored GridPool identity. Restore or repair the existing configuration; it will not be overwritten.')
+    }
   }
 
   const bootConfig = {
@@ -154,6 +162,11 @@ export const main = sdk.setupMain(async ({ effects }) => {
     work_set_reserve_multiplier: 3,
     local_adapter_token_file: '/data/shared/local-adapter.token',
     local_sv2_api_url: 'http://127.0.0.1:34290/api/v1/global',
+    native_sv2_enabled: true,
+    native_sv2_public_host: settings.minerHost,
+    native_sv2_public_port: sv2Port,
+    native_sv2_authority_public_key: authorityPublic,
+    trusted_private_dashboard_enabled: settings.trustedPrivateDashboard,
     enable_admin_api: false,
     ...persistedIdentity,
   }
@@ -254,7 +267,9 @@ min_interval = 5
               'sh',
               '-c',
               [
-                'json=$(curl -fsS --max-time 5 http://127.0.0.1:5000/api/network/summary | tr -d "\\r\\n")',
+                'set -eu',
+                'json=$(curl -fsS --max-time 5 http://127.0.0.1:5000/api/network/summary)',
+                'json=$(printf "%s" "$json" | tr -d "\\r\\n")',
                 'json_lc=$(printf "%s" "$json" | tr "[:upper:]" "[:lower:]")',
                 'peers=$(printf "%s" "$json_lc" | sed -nE \'s/.*"peercount"[[:space:]]*:[[:space:]]*([0-9]+).*/\\1/p\')',
                 'tip=$(printf "%s" "$json_lc" | sed -nE \'s/.*"currenttipblockheight"[[:space:]]*:[[:space:]]*([0-9]+).*/\\1/p\')',
@@ -283,7 +298,9 @@ min_interval = 5
               'sh',
               '-c',
               [
-                'json=$(curl -fsS --max-time 5 http://127.0.0.1:5000/api/network/summary | tr -d "\\r\\n")',
+                'set -eu',
+                'json=$(curl -fsS --max-time 5 http://127.0.0.1:5000/api/network/summary)',
+                'json=$(printf "%s" "$json" | tr -d "\\r\\n")',
                 'json_lc=$(printf "%s" "$json" | tr "[:upper:]" "[:lower:]")',
                 'pulses=$(printf "%s" "$json_lc" | sed -nE \'s/.*"localpulseacceptedcount"[[:space:]]*:[[:space:]]*([0-9]+).*/\\1/p\')',
                 'lastPulse=$(printf "%s" "$json" | sed -nE \'s/.*"lastLocalPulseUtc"[[:space:]]*:[[:space:]]*"([^"]*)".*/\\1/p\')',
@@ -298,7 +315,7 @@ min_interval = 5
               errorMessage: 'GridPool relay telemetry is unavailable',
               message: (result) => {
                 const message = result.trim()
-                return message.includes('accepted=0')
+                return message.includes('accepted=0; last pulse=--; last outbound relay=--')
                   ? `${message} (no pulse traffic yet; this is normal when idle)`
                   : message
               },

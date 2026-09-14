@@ -1,6 +1,7 @@
 {
   "name": "gridpool-startos",
   "scripts": {
+    "test": "node --test scripts/*.test.mjs",
     "build": "rm -rf ./javascript && ncc build startos/index.ts -o ./javascript",
     "check": "tsc --noEmit",
     "prettier": "prettier --write startos"
