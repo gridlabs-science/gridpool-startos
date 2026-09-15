@@ -1,5 +1,8 @@
 # GridPool triangle icon
 
+Keep this guide named BRANDING.md: StartOS icon discovery treats ICON.md as a
+second candidate beside icon.svg regardless of its extension.
+
 The production master is `icon.svg`, shared byte-for-byte with the Umbrel
 package's `gridlabs-gridpool/icon.svg`. No fonts, scripts, or external assets.
 
